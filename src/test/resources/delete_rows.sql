@@ -1,0 +1,1 @@
+DELETE FROM [DEV].[dbo].[EXECUTIONS] WHERE [ID] > 1;

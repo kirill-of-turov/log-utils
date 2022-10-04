@@ -1,0 +1,21 @@
+CREATE TABLE EXECUTIONS (
+    [ID] int NOT NULL,
+    [SERVER] nvarchar(20) NOT NULL,
+    [ODEE_VERSION] nvarchar(30) NOT NULL,
+    [CLEAN] bit NOT NULL,
+    [LINES] smallint NOT NULL,
+    [RECORDS] smallint NOT NULL,
+    [ERRORS] smallint NOT NULL,
+    [WARNS] smallint NOT NULL,
+    [INFOS] smallint NOT NULL,
+    [SPRING_TIMERS] smallint NOT NULL,
+    [START] datetimeoffset NOT NULL,
+    [END] datetimeoffset NOT NULL,
+    [MIN] smallint NOT NULL,
+    [MAX] smallint NOT NULL,
+    [SUM] int NOT NULL,
+    [AVERAGE] float NOT NULL,
+    [MEDIAN] float NOT NULL,
+    [SATISFIED] smallint NOT NULL,
+    [TOLERANT] smallint NOT NULL
+);
