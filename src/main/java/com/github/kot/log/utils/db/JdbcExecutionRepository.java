@@ -15,7 +15,7 @@ import java.util.Properties;
 @Slf4j
 public class JdbcExecutionRepository {
 
-    private static final String SPRING_DATASOURCE_URL_PROPERTY = "spring.datasource.url";
+    public static final String SPRING_DATASOURCE_IP_PROPERTY = "spring.datasource.ip";
     private static final String SPRING_DATASOURCE_USERNAME_PROPERTY = "spring.datasource.username";
     private static final String SPRING_DATASOURCE_PASSWORD_PROPERTY = "spring.datasource.password";
     private static final String SPRING_DATASOURCE_DRIVER_PROPERTY = "spring.datasource.driver";
@@ -23,18 +23,11 @@ public class JdbcExecutionRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public JdbcExecutionRepository() {
-        Properties properties = new Properties();
-        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")) {
-            properties.load(input);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        Properties properties = getProperties();
+        String ipAddress =  getDatabaseServerIpAddress();
+        log.info("DB server IP address: {}", ipAddress);
         DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
-        String datasourceUrl = System.getProperty(SPRING_DATASOURCE_URL_PROPERTY) == null
-                ? properties.getProperty(SPRING_DATASOURCE_URL_PROPERTY)
-                : System.getProperty(SPRING_DATASOURCE_URL_PROPERTY);
-        log.info("Datasource URL: {}", datasourceUrl);
-        driverManagerDataSource.setUrl(datasourceUrl);
+        driverManagerDataSource.setUrl(String.format("jdbc:sqlserver://%s:1433;databaseName=dev;encrypt=true;trustServerCertificate=true;", ipAddress));
         driverManagerDataSource.setUsername(properties.getProperty(SPRING_DATASOURCE_USERNAME_PROPERTY));
         driverManagerDataSource.setPassword(properties.getProperty(SPRING_DATASOURCE_PASSWORD_PROPERTY));
         driverManagerDataSource.setDriverClassName(properties.getProperty(SPRING_DATASOURCE_DRIVER_PROPERTY));
@@ -107,6 +100,22 @@ public class JdbcExecutionRepository {
         } else {
             return 1;
         }
+    }
+
+    public String getDatabaseServerIpAddress() {
+        return System.getProperty(SPRING_DATASOURCE_IP_PROPERTY) == null
+                ? getProperties().getProperty(SPRING_DATASOURCE_IP_PROPERTY)
+                : System.getProperty(SPRING_DATASOURCE_IP_PROPERTY);
+    }
+
+    private Properties getProperties() {
+        Properties properties = new Properties();
+        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")) {
+            properties.load(input);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return properties;
     }
 
 }

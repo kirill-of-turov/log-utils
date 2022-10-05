@@ -15,6 +15,14 @@ ext {
 
 application {
     mainClassName = javaMainClass
+    println("System properties (key:value)")
+    System.getProperties().forEach((k, v) -> println(k + ":" + v))
+    String jvmArgs = System.getProperty("org.gradle.jvmargs")
+    if (jvmArgs != null) {
+        applicationDefaultJvmArgs = List.of(jvmArgs)
+        println("Application default JVM arguments")
+        applicationDefaultJvmArgs.forEach(a -> println(a))
+    }
 }
 
 repositories {
