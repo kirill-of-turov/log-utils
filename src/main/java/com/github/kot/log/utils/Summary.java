@@ -13,6 +13,7 @@ public class Summary {
     private String server;
     private String odeeVersion;
     private boolean clean;
+    private String commit;
     private int logLinesTotalNumber;
     private int logRecordsNumber;
     private int errorRecordsNumber;

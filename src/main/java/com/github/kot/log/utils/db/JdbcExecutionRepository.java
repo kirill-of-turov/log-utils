@@ -40,13 +40,14 @@ public class JdbcExecutionRepository {
 
     public List<Summary> getExecutions() {
         return jdbcTemplate.query(
-                "SELECT TOP (1000) [ID], [SERVER], [ODEE_VERSION], [CLEAN], [LINES], [RECORDS], [ERRORS], [WARNS], [INFOS], [SPRING_TIMERS], [START], [END], [MIN], [MAX], [SUM], [AVERAGE], [MEDIAN], [SATISFIED], [TOLERANT] FROM [DEV].[dbo].[EXECUTIONS]",
+                "SELECT TOP (1000) [ID], [SERVER], [ODEE_VERSION], [CLEAN], [COMMIT], [LINES], [RECORDS], [ERRORS], [WARNS], [INFOS], [SPRING_TIMERS], [START], [END], [MIN], [MAX], [SUM], [AVERAGE], [MEDIAN], [SATISFIED], [TOLERANT] FROM [DEV].[dbo].[EXECUTIONS]",
                 (rs, rowNum) -> {
                     Summary summary = new Summary();
                     summary.setId(rs.getLong("ID"));
                     summary.setServer(rs.getString("SERVER"));
                     summary.setOdeeVersion(rs.getString("ODEE_VERSION"));
                     summary.setClean(rs.getBoolean("CLEAN"));
+                    summary.setCommit(rs.getString("COMMIT"));
                     summary.setLogLinesTotalNumber(rs.getInt("LINES"));
                     summary.setLogRecordsNumber(rs.getInt("RECORDS"));
                     summary.setErrorRecordsNumber(rs.getInt("ERRORS"));
@@ -70,11 +71,12 @@ public class JdbcExecutionRepository {
     public int addExecution(Summary summary) {
         int id = getNextId();
         return jdbcTemplate.update(
-                "INSERT INTO [DEV].[dbo].EXECUTIONS ([ID], [SERVER], [ODEE_VERSION], [CLEAN], [LINES], [RECORDS], [ERRORS], [WARNS], [INFOS], [SPRING_TIMERS], [START], [END], [MIN], [MAX], [SUM], [AVERAGE], [MEDIAN], [SATISFIED], [TOLERANT]) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO [DEV].[dbo].EXECUTIONS ([ID], [SERVER], [ODEE_VERSION], [CLEAN], [COMMIT], [LINES], [RECORDS], [ERRORS], [WARNS], [INFOS], [SPRING_TIMERS], [START], [END], [MIN], [MAX], [SUM], [AVERAGE], [MEDIAN], [SATISFIED], [TOLERANT]) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 summary.getServer(),
                 summary.getOdeeVersion(),
                 summary.isClean(),
+                summary.getCommit(),
                 summary.getLogLinesTotalNumber(),
                 summary.getLogRecordsNumber(),
                 summary.getErrorRecordsNumber(),

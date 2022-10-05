@@ -31,12 +31,14 @@ public class Runner {
     public static void main(String[] args) {
         String logFilePath = args[0];
         boolean clean = Boolean.parseBoolean(args[1]);
-        new Runner().run(logFilePath, clean);
+        String commit = args[2];
+        new Runner().run(logFilePath, clean, commit);
     }
 
-    public void run(String logFilePath, boolean clean) {
+    public void run(String logFilePath, boolean clean, String commit) {
         Summary summary = new Summary();
         summary.setClean(clean);
+        summary.setCommit(commit);
         log.info("Clean execution: {}", summary.isClean());
         try {
             summary.setServer(InetAddress.getLocalHost().getHostName());

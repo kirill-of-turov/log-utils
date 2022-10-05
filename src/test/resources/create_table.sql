@@ -3,6 +3,7 @@ CREATE TABLE EXECUTIONS (
     [SERVER] nvarchar(20) NOT NULL,
     [ODEE_VERSION] nvarchar(30) NOT NULL,
     [CLEAN] bit NOT NULL,
+    [COMMIT] nvarchar(40) NOT NULL,
     [LINES] smallint NOT NULL,
     [RECORDS] smallint NOT NULL,
     [ERRORS] smallint NOT NULL,
