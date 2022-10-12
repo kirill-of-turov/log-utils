@@ -1,9 +1,11 @@
-package com.github.kot.log.utils;
+package com.github.kot.log.utils.bo;
 
 import lombok.Data;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+
+import static java.lang.String.format;
 
 @Data
 public class Summary {
@@ -27,7 +29,7 @@ public class Summary {
     private int minResponseDuration;
     private int maxResponseDuration;
     private int sumResponseDuration;
-//    private double responseDurationPerDuration;
+    //    private double responseDurationPerDuration;
 //    private double responseDurationPerDuration;
     private double averageResponseDuration;
     private double medianResponseDuration;
@@ -67,6 +69,15 @@ public class Summary {
     public Duration getLogDuration() {
         return Duration.between(startTimestamp, endTimestamp);
     }
+
+    public String getLogDurationFormatted() {
+        return format("%02d:%02d:%02d.%03d",
+                getLogDuration().toHoursPart(),
+                getLogDuration().toMinutesPart(),
+                getLogDuration().toSecondsPart(),
+                getLogDuration().toMillisPart());
+    }
+
 
     public double getResponseDurationPerDuration() {
         return (double) sumResponseDuration / getLogDuration().toMillis();
