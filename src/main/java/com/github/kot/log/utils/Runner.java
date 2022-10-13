@@ -281,7 +281,7 @@ public class Runner {
             StringWriter htmlWriter = new StringWriter();
             template.process(root, htmlWriter);
             template.process(root, new FileWriter(fileName));
-
+            log.info("Send email report");
             EmailUtils.sendReport(summary.getOdeeVersion(), getUserName(), getPassword(), getSender(), getRecipients(), htmlWriter.toString(), zonedDateTime.toString());
         } catch (IOException | TemplateException e) {
             log.error(e.getLocalizedMessage(), e);
