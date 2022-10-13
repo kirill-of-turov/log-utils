@@ -66,16 +66,14 @@ public class Runner {
     private ZonedDateTime zonedDateTime;
 
     public static void main(String[] args) {
-        String commit = args[2];
-
         Runner runner = new Runner();
         runner.setLogFilePath(args[0]);
         runner.setClean(Boolean.parseBoolean(args[1]));
-        runner.setCommit(commit);
+        runner.setCommit(args[2]);
         runner.setUserName(args[3]);
         runner.setPassword(args[4]);
         runner.setSender(args[5]);
-        runner.setRecipients(args[5]);
+        runner.setRecipients(args[6]);
         runner.run();
     }
 
