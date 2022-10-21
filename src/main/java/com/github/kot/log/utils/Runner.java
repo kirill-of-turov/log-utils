@@ -221,19 +221,20 @@ public class Runner {
             topTen.forEach(requestData -> log.info("{}", requestData));
 
             JdbcExecutionRepository jdbcExecutionRepository = new JdbcExecutionRepository();
-            List<Summary> allSummaries = jdbcExecutionRepository.getExecutions();
-            if (allSummaries
+            List<Summary> allSummariesBefore = jdbcExecutionRepository.getExecutions();
+            if (allSummariesBefore
                     .stream()
                     .noneMatch(s -> s.getServer().equals(summary.getServer())
                             && s.getOdeeVersion().equals(summary.getOdeeVersion())
                             && s.getStartTimestamp().isEqual(summary.getStartTimestamp()))) {
                 jdbcExecutionRepository.addExecution(summary);
             }
+            List<Summary> allSummariesAfter = jdbcExecutionRepository.getExecutions();
 
-            List<Summary> processedSummaries = allSummaries
+            List<Summary> processedSummaries = allSummariesAfter
                     .stream()
                     .filter(s -> (s.isClean()
-                            || s.getId() == allSummaries
+                            || s.getId() == allSummariesAfter
                             .stream()
                             .max(Comparator.comparingLong(Summary::getId))
                             .orElseThrow(() -> new IllegalStateException("No executions found!"))
