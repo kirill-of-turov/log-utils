@@ -3,6 +3,7 @@ package com.github.kot.log.utils;
 import com.github.kot.log.utils.bo.Record;
 import com.github.kot.log.utils.bo.RequestData;
 import com.github.kot.log.utils.bo.Summary;
+import com.github.kot.log.utils.bo.UrlData;
 import com.github.kot.log.utils.db.JdbcExecutionRepository;
 import com.github.kot.log.utils.utils.EmailUtils;
 import freemarker.template.Configuration;
@@ -19,11 +20,16 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -78,6 +85,7 @@ public class Runner {
     }
 
     public void run() {
+        zonedDateTime = ZonedDateTime.now();
         summary = new Summary();
         summary.setClean(clean);
         summary.setCommit(commit);
@@ -117,7 +125,7 @@ public class Runner {
                     records.add(r);
                 } else {
                     String lastMessage = records.getLast().getMessage();
-                    String newMessage = lastMessage + System.getProperty("line.separator") + logLine;
+                    String newMessage = lastMessage + System.lineSeparator() + logLine;
                     records.getLast().setMessage(newMessage);
                 }
             }
@@ -212,6 +220,56 @@ public class Runner {
             log.info("Current execution");
             log.info("{}", summary);
 
+            // write request statistics by URL paths
+            Set<String> urlPaths = requestStatistics.stream().map(RequestData::getUrlPath).collect(Collectors.toSet());
+            List<UrlData> urlDataList = new ArrayList<>();
+            for (String urlPath : urlPaths) {
+                UrlData urlData = new UrlData();
+                List<RequestData> urlSpecificRequestData = requestStatistics.stream().filter(rd -> rd.getUrlPath().equals(urlPath)).collect(Collectors.toList());
+                int urlSpecificMinDuration = urlSpecificRequestData.stream().min(Comparator.comparing(RequestData::getDuration)).orElseThrow(NoSuchElementException::new).getDuration();
+                int urlSpecificMaxDuration = urlSpecificRequestData.stream().max(Comparator.comparing(RequestData::getDuration)).orElseThrow(NoSuchElementException::new).getDuration();
+                int urlSpecificSumDuration = urlSpecificRequestData.stream().mapToInt(RequestData::getDuration).sum();
+                double urlSpecificAverageDuration = urlSpecificRequestData.stream().mapToInt(RequestData::getDuration).average().orElseThrow(NoSuchElementException::new);
+                IntStream urlSpecificSortedDuration = urlSpecificRequestData.stream().mapToInt(RequestData::getDuration).sorted();
+                double urlSpecificMedianDuration = urlSpecificRequestData.size() % 2 == 0 ?
+                        urlSpecificSortedDuration.skip(urlSpecificRequestData.size() / 2L - 1).limit(2).average().orElseThrow(NoSuchElementException::new) :
+                        urlSpecificSortedDuration.skip(urlSpecificRequestData.size() / 2).findFirst().orElseThrow(NoSuchElementException::new);
+
+                urlData.setCount(urlSpecificRequestData.size());
+                urlData.setUrlPath(urlPath);
+                urlData.setMin(urlSpecificMinDuration);
+                urlData.setMax(urlSpecificMaxDuration);
+                urlData.setSum(urlSpecificSumDuration);
+                urlData.setAverage(urlSpecificAverageDuration);
+                urlData.setMedian(urlSpecificMedianDuration);
+
+                log.info("{}", urlData);
+                urlDataList.add(urlData);
+            }
+
+            String csvHeaders = "Path,Count,Min,Max,Sum,Avg,Mean";
+            List<String> csvLines = urlDataList
+                    .stream()
+                    .map(ud -> String.format("%s,%d,%d,%d,%d,%f,%f",
+                            ud.getUrlPath(),
+                            ud.getCount(),
+                            ud.getMin(),
+                            ud.getMax(),
+                            ud.getSum(),
+                            ud.getAverage(),
+                            ud.getMedian()))
+                    .collect(Collectors.toList());
+            List<String> csvAll = new ArrayList<>();
+            csvAll.add(csvHeaders);
+            csvAll.addAll(csvLines);
+            Path file = Paths.get(String.format("url_paths_%s_%s.csv",
+                    summary.getOdeeVersion(), zonedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))));
+            try {
+                Files.write(file, csvAll, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                log.error(e.getLocalizedMessage(), e);
+            }
+
             log.info("Top slowest responses");
             List<RequestData> topTen = requestStatistics
                     .stream()
@@ -249,8 +307,6 @@ public class Runner {
             processedSummaries.forEach(s -> log.info("{}", s));
 
             boolean showOthers = processedSummaries.stream().anyMatch(s -> s.getOtherLevelRecordsNumber() > 0);
-
-            zonedDateTime = ZonedDateTime.now();
 
             Map<String, Object> root = new HashMap<>();
             root.put("timestamp", zonedDateTime.toString());
