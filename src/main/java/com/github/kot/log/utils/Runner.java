@@ -45,6 +45,7 @@ import java.util.stream.IntStream;
 
 import static com.github.kot.log.utils.Constants.DATE_TIME_FORMATTER_LOG;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
 @Getter
@@ -96,8 +97,8 @@ public class Runner {
             log.error(e.getLocalizedMessage(), e);
         }
         try (FileInputStream inputStream = new FileInputStream(logFilePath)) {
-            String logString = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-            List<String> logLines = Arrays.stream(logString.split("\r\n|\r|\n")).collect(Collectors.toList());
+            String logString = IOUtils.toString(inputStream, UTF_8);
+            List<String> logLines = Arrays.stream(logString.split("\r\n|\r|\n")).toList();
             summary.setLogLinesTotalNumber(logLines.size());
             log.info("Total number of lines: {}", summary.getLogLinesTotalNumber());
 
@@ -143,21 +144,21 @@ public class Runner {
             List<Record> errorRecords = records
                     .stream()
                     .filter(r -> r.getLevel().equals("ERROR"))
-                    .collect(Collectors.toList());
+                    .toList();
             summary.setErrorRecordsNumber(errorRecords.size());
             log.info("ERROR records: {} ({} of all records)", summary.getErrorRecordsNumber(), getPercentage(summary.getErrorRecordRate()));
 
             List<Record> warnRecords = records
                     .stream()
                     .filter(r -> r.getLevel().equals("WARN"))
-                    .collect(Collectors.toList());
+                    .toList();
             summary.setWarnRecordsNumber(warnRecords.size());
             log.info("WARN records: {} ({} of all records)", summary.getWarnRecordsNumber(), getPercentage(summary.getWarnRecordRate()));
 
             List<Record> infoRecords = records
                     .stream()
                     .filter(r -> r.getLevel().equals("INFO"))
-                    .collect(Collectors.toList());
+                    .toList();
             summary.setInfoRecordsNumber(infoRecords.size());
             log.info("INFO records: {} ({} of all records)", summary.getInfoRecordsNumber(), getPercentage(summary.getInfoRecordRate()));
 
@@ -166,7 +167,7 @@ public class Runner {
             List<Record> springTimerFilterRecords = records
                     .stream()
                     .filter(r -> r.getClassName().equals("SpringTimerFilter"))
-                    .collect(Collectors.toList());
+                    .toList();
             summary.setSpringTimerFilterRecordsNumber(springTimerFilterRecords.size());
             log.info("Number of SpringTimerFilter records: {} ({} of all records)", summary.getSpringTimerFilterRecordsNumber(), getPercentage(summary.getSpringTimerFilterRecordRate()));
 
@@ -225,7 +226,7 @@ public class Runner {
             List<UrlData> urlDataList = new ArrayList<>();
             for (String urlPath : urlPaths) {
                 UrlData urlData = new UrlData();
-                List<RequestData> urlSpecificRequestData = requestStatistics.stream().filter(rd -> rd.getUrlPath().equals(urlPath)).collect(Collectors.toList());
+                List<RequestData> urlSpecificRequestData = requestStatistics.stream().filter(rd -> rd.getUrlPath().equals(urlPath)).toList();
                 int urlSpecificMinDuration = urlSpecificRequestData.stream().min(Comparator.comparing(RequestData::getDuration)).orElseThrow(NoSuchElementException::new).getDuration();
                 int urlSpecificMaxDuration = urlSpecificRequestData.stream().max(Comparator.comparing(RequestData::getDuration)).orElseThrow(NoSuchElementException::new).getDuration();
                 int urlSpecificSumDuration = urlSpecificRequestData.stream().mapToInt(RequestData::getDuration).sum();
@@ -258,14 +259,14 @@ public class Runner {
                             ud.getSum(),
                             ud.getAverage(),
                             ud.getMedian()))
-                    .collect(Collectors.toList());
+                    .toList();
             List<String> csvAll = new ArrayList<>();
             csvAll.add(csvHeaders);
             csvAll.addAll(csvLines);
             Path file = Paths.get(String.format("url_paths_%s_%s.csv",
                     summary.getOdeeVersion(), zonedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))));
             try {
-                Files.write(file, csvAll, StandardCharsets.UTF_8);
+                Files.write(file, csvAll, UTF_8);
             } catch (IOException e) {
                 log.error(e.getLocalizedMessage(), e);
             }
@@ -275,7 +276,7 @@ public class Runner {
                     .stream()
                     .sorted(Comparator.comparingInt(RequestData::getDuration).reversed())
                     .limit(10)
-                    .collect(Collectors.toList());
+                    .toList();
             topTen.forEach(requestData -> log.info("{}", requestData));
 
             JdbcExecutionRepository jdbcExecutionRepository = new JdbcExecutionRepository();
@@ -301,7 +302,7 @@ public class Runner {
                             && s.getId() > 0)
                     .sorted(Comparator.comparing(Summary::getId).reversed())
                     .limit(20)
-                    .collect(Collectors.toList());
+                    .toList();
 
             log.info("Processed executions");
             processedSummaries.forEach(s -> log.info("{}", s));
