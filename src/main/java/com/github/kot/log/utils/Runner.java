@@ -68,6 +68,7 @@ public class Runner {
     private String userName;
     private String password;
     private String sender;
+    private String personal;
     private String recipients;
 
     private Summary summary;
@@ -81,7 +82,8 @@ public class Runner {
         runner.setUserName(args[3]);
         runner.setPassword(args[4]);
         runner.setSender(args[5]);
-        runner.setRecipients(args[6]);
+        runner.setPersonal(args[6]);
+        runner.setRecipients(args[7]);
         runner.run();
     }
 
@@ -338,7 +340,7 @@ public class Runner {
             template.process(root, htmlWriter);
             template.process(root, new FileWriter(fileName));
             log.info("Send email report");
-            EmailUtils.sendReport(summary.getOdeeVersion(), getUserName(), getPassword(), getSender(), getRecipients(), htmlWriter.toString(), zonedDateTime.toString());
+            EmailUtils.sendReport(summary.getOdeeVersion(), getUserName(), getPassword(), getSender(), getPersonal(), getRecipients(), htmlWriter.toString(), zonedDateTime.toString());
         } catch (IOException | TemplateException e) {
             log.error(e.getLocalizedMessage(), e);
         }

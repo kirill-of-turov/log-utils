@@ -14,13 +14,14 @@ import jakarta.mail.internet.MimeMultipart;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 @Slf4j
 @UtilityClass
 public class EmailUtils {
 
-    public void sendReport(String appVersion, String login, String password, String from, String to, String htmlContent, String timestamp) {
+    public void sendReport(String appVersion, String login, String password, String from, String personal, String to, String htmlContent, String timestamp) {
         var prop = new Properties();
         prop.put("mail.smtp.auth", true);
         prop.put("mail.smtp.starttls.enable", "true");
@@ -36,7 +37,7 @@ public class EmailUtils {
 
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(from));
+            message.setFrom(new InternetAddress(from, personal));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(appVersion + " log analysis results as of " + timestamp);
 
@@ -51,6 +52,9 @@ public class EmailUtils {
             Transport.send(message);
         } catch (MessagingException e) {
             log.error(e.getLocalizedMessage(), e);
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 }
