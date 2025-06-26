@@ -7,7 +7,7 @@
   </head>
   <body style="font-size: 12px">
     <h1>Recent log analysis results</h1>
-    <table border="1" style="width: 100%; text-align:center;">
+    <table border="1" style="width: 100%; text-align:center; border-collapse: collapse;">
       <tr>
         <th>Version</th>
         <th>Start</th>
@@ -63,7 +63,7 @@
       </#list>
     </table>
     <h1>${lastExecution.odeeVersion} top slowest responses</h1>
-    <table border="1" style="width: 100%; text-align:center;">
+    <table border="1" style="width: 100%; text-align:center; border-collapse: collapse;">
         <tr>
             <th>Method</th>
             <th>Path</th>
