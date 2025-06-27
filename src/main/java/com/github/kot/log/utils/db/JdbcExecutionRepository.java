@@ -2,7 +2,7 @@ package com.github.kot.log.utils.db;
 
 import com.github.kot.log.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
-import com.github.kot.log.utils.Summary;
+import com.github.kot.log.utils.bo.Summary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 

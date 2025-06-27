@@ -1,4 +1,4 @@
-package com.github.kot.log.utils;
+package com.github.kot.log.utils.bo;
 
 import lombok.Data;
 
