@@ -9,8 +9,6 @@ plugins {
 group 'com.github.kot'
 version = project.findProperty('version') ?: '1.0'
 
-def timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
-
 ext {
     commonsIOVersion = '2.22.0'
     freemarkerVersion = '2.3.34'
@@ -39,32 +37,6 @@ jar {
     manifest {
         attributes 'Main-Class': application.mainClass.get()
     }
-}
-
-tasks.register("shadowJarWithTimestamp") {
-    dependsOn tasks.named("shadowJar")
-
-    def shadowJarTask = tasks.named("shadowJar")
-    def outputFile = layout.buildDirectory.file(
-            "libs/${rootProject.name}-all-${timestamp}.jar"
-    )
-
-    inputs.file(shadowJarTask.flatMap { it.archiveFile })
-    outputs.file(outputFile)
-
-    doLast {
-        copy {
-            from shadowJarTask.get().archiveFile
-            into layout.buildDirectory.dir("libs")
-            rename {
-                "${rootProject.name}-all-${timestamp}.jar"
-            }
-        }
-    }
-}
-
-tasks.named("build") {
-    dependsOn("shadowJarWithTimestamp")
 }
 
 repositories {
