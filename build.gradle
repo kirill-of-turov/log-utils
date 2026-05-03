@@ -1,33 +1,70 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id 'application'
     id 'java'
+    id 'com.gradleup.shadow' version '9.4.1'
 }
 
 group 'com.github.kot'
-version '1.0'
+version = project.findProperty('version') ?: '1.0'
+
+def timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
 
 ext {
-    commonsIOVersion = '2.17.0'
-    freemarkerVersion = '2.3.33'
-    jakartaMailVersion = '2.0.1'
+    commonsIOVersion = '2.22.0'
+    freemarkerVersion = '2.3.34'
+    jakartaMailVersion = '2.0.2'
     javaMainClass = 'com.github.kot.log.utils.Runner'
-    junitVersion = '5.11.3'
-    logbackVersion = '1.5.12'
-    lombokVersion = '1.18.34'
-    mssqlJdbcVersion = '12.8.1.jre11'
-    springVersion = '6.1.14'
+    junitVersion = '6.0.3'
+    logbackVersion = '1.5.32'
+    lombokVersion = '1.18.46'
+    mssqlJdbcVersion = '13.4.0.jre11'
+    springVersion = '7.0.7'
 }
 
 application {
-    mainClassName = javaMainClass
-    println("System properties (key:value)")
-    System.getProperties().forEach((k, v) -> println(k + ":" + v))
-    String jvmArgs = System.getProperty("org.gradle.jvmargs")
+    mainClass = javaMainClass
+    println('System properties (key:value)')
+    System.getProperties().forEach((k, v) -> println(k + ':' + v))
+    String jvmArgs = System.getProperty('org.gradle.jvmargs')
     if (jvmArgs != null) {
         applicationDefaultJvmArgs = List.of(jvmArgs)
-        println("Application default JVM arguments")
+        println('Application default JVM arguments')
         applicationDefaultJvmArgs.forEach(a -> println(a))
     }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+}
+
+tasks.register("shadowJarWithTimestamp") {
+    dependsOn tasks.named("shadowJar")
+
+    def shadowJarTask = tasks.named("shadowJar")
+    def outputFile = layout.buildDirectory.file(
+            "libs/${rootProject.name}-all-${timestamp}.jar"
+    )
+
+    inputs.file(shadowJarTask.flatMap { it.archiveFile })
+    outputs.file(outputFile)
+
+    doLast {
+        copy {
+            from shadowJarTask.get().archiveFile
+            into layout.buildDirectory.dir("libs")
+            rename {
+                "${rootProject.name}-all-${timestamp}.jar"
+            }
+        }
+    }
+}
+
+tasks.named("build") {
+    dependsOn("shadowJarWithTimestamp")
 }
 
 repositories {
@@ -39,15 +76,16 @@ test {
 }
 
 dependencies {
-    implementation group: 'com.sun.mail', name: 'jakarta.mail', version: jakartaMailVersion
-    implementation group: 'org.freemarker', name: 'freemarker', version: freemarkerVersion
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
-    implementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: mssqlJdbcVersion
-    implementation group: 'org.springframework', name: 'spring-jdbc', version: springVersion
-    implementation group: 'commons-io', name: 'commons-io', version: commonsIOVersion
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    implementation "com.sun.mail:jakarta.mail:$jakartaMailVersion"
+    implementation "org.freemarker:freemarker:$freemarkerVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    implementation "com.microsoft.sqlserver:mssql-jdbc:$mssqlJdbcVersion"
+    implementation "org.springframework:spring-jdbc:$springVersion"
+    implementation "commons-io:commons-io:$commonsIOVersion"
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
