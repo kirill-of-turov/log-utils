@@ -21,6 +21,12 @@ ext {
     springVersion = '7.0.7'
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 application {
     mainClass = javaMainClass
     println('System properties (key:value)')
