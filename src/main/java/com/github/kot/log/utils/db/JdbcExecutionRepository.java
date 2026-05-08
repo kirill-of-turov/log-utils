@@ -40,7 +40,7 @@ public class JdbcExecutionRepository {
 
     public List<Summary> getExecutions() {
         return jdbcTemplate.query(
-                "SELECT TOP (1000) [ID], [SERVER], [ODEE_VERSION], [CLEAN], [COMMIT], [LINES], [RECORDS], [ERRORS], [WARNS], [INFOS], [SPRING_TIMERS], [START], [END], [MIN], [MAX], [SUM], [AVERAGE], [MEDIAN], [SATISFIED], [TOLERANT] FROM [DEV].[dbo].[EXECUTIONS]",
+                "SELECT [ID], [SERVER], [ODEE_VERSION], [CLEAN], [COMMIT], [LINES], [RECORDS], [ERRORS], [WARNS], [INFOS], [SPRING_TIMERS], [START], [END], [MIN], [MAX], [SUM], [AVERAGE], [MEDIAN], [SATISFIED], [TOLERANT] FROM [DEV].[dbo].[EXECUTIONS]",
                 (rs, rowNum) -> {
                     Summary summary = new Summary();
                     summary.setId(rs.getLong("ID"));
