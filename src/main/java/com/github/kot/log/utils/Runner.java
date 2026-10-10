@@ -70,6 +70,7 @@ public class Runner {
     private String sender;
     private String personal;
     private String recipients;
+    private String version;
 
     private Summary summary;
     private ZonedDateTime zonedDateTime;
@@ -84,6 +85,9 @@ public class Runner {
         runner.setSender(args[5]);
         runner.setPersonal(args[6]);
         runner.setRecipients(args[7]);
+        if (args.length > 8) {
+            runner.setVersion(args[8]);
+        }
         runner.run();
     }
 
@@ -135,13 +139,22 @@ public class Runner {
             summary.setLogRecordsNumber(records.size());
             log.info("Number of records: {} ({} of all lines)", summary.getLogRecordsNumber(), getPercentage(summary.getRecordsToLinesRate()));
 
-            String openDataVersionRecordMessage = records.stream().map(Record::getMessage).filter(OPENDATA_VERSION_PATTERN.asPredicate()).findFirst().orElseThrow(NoSuchElementException::new);
+            if (version != null && !version.isBlank()) {
+                summary.setOdeeVersion(version);
+            } else {
+                String openDataVersionRecordMessage = records.stream()
+                        .map(Record::getMessage)
+                        .filter(OPENDATA_VERSION_PATTERN.asPredicate())
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException(
+                                "OpenData version not found in log. Specify it as the ninth application argument."));
 
-            Matcher opeDataVersionMatcher = OPENDATA_VERSION_PATTERN.matcher(openDataVersionRecordMessage);
-            if (opeDataVersionMatcher.find()) {
-                summary.setOdeeVersion(opeDataVersionMatcher.group(1));
-                log.info("OpenData version: {}", summary.getOdeeVersion());
+                Matcher openDataVersionMatcher = OPENDATA_VERSION_PATTERN.matcher(openDataVersionRecordMessage);
+                if (openDataVersionMatcher.find()) {
+                    summary.setOdeeVersion(openDataVersionMatcher.group(1));
+                }
             }
+            log.info("OpenData version: {}", summary.getOdeeVersion());
 
             List<Record> errorRecords = records
                     .stream()
