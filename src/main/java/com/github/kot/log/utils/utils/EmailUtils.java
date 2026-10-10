@@ -12,12 +12,10 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-@Slf4j
 @UtilityClass
 public class EmailUtils {
 
@@ -27,6 +25,9 @@ public class EmailUtils {
         prop.put("mail.smtp.starttls.enable", "true");
         prop.put("mail.smtp.host", "smtp.gmail.com");
         prop.put("mail.smtp.port", "587");
+        prop.setProperty("mail.smtp.connectiontimeout", "10000");
+        prop.setProperty("mail.smtp.timeout", "30000");
+        prop.setProperty("mail.smtp.writetimeout", "30000");
 
         var session = Session.getInstance(prop, new Authenticator() {
             @Override
@@ -50,11 +51,8 @@ public class EmailUtils {
             message.setContent(multipart);
 
             Transport.send(message);
-        } catch (MessagingException e) {
-            log.error(e.getLocalizedMessage(), e);
-        } catch (UnsupportedEncodingException e) {
-            log.error(e.getLocalizedMessage());
-            throw new RuntimeException(e);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new IllegalStateException("Failed to send email report", e);
         }
     }
 }
