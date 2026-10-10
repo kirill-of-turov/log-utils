@@ -52,6 +52,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Runner {
 
     private static final Path REPORTS_DIRECTORY = Paths.get("reports");
+    private static final Path STATS_DIRECTORY = Paths.get("stats");
 
     private static final String OPENDATA_VERSION_REGEXP = "Opendata \\[version=(\\S*)\\]";
     private static final Pattern OPENDATA_VERSION_PATTERN = Pattern.compile(OPENDATA_VERSION_REGEXP);
@@ -266,10 +267,10 @@ public class Runner {
             List<String> csvAll = new ArrayList<>();
             csvAll.add(csvHeaders);
             csvAll.addAll(csvLines);
-            Path file = REPORTS_DIRECTORY.resolve(String.format("url_paths_%s_%s.csv",
+            Path file = STATS_DIRECTORY.resolve(String.format("url_paths_%s_%s.csv",
                     summary.getOdeeVersion(), zonedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))));
             try {
-                Files.createDirectories(REPORTS_DIRECTORY);
+                Files.createDirectories(STATS_DIRECTORY);
                 Files.write(file, csvAll, UTF_8);
             } catch (IOException e) {
                 log.error(e.getLocalizedMessage(), e);
