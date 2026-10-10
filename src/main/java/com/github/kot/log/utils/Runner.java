@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.InetAddress;
@@ -51,6 +50,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Getter
 @Setter
 public class Runner {
+
+    private static final Path REPORTS_DIRECTORY = Paths.get("reports");
 
     private static final String OPENDATA_VERSION_REGEXP = "Opendata \\[version=(\\S*)\\]";
     private static final Pattern OPENDATA_VERSION_PATTERN = Pattern.compile(OPENDATA_VERSION_REGEXP);
@@ -265,9 +266,10 @@ public class Runner {
             List<String> csvAll = new ArrayList<>();
             csvAll.add(csvHeaders);
             csvAll.addAll(csvLines);
-            Path file = Paths.get(String.format("url_paths_%s_%s.csv",
+            Path file = REPORTS_DIRECTORY.resolve(String.format("url_paths_%s_%s.csv",
                     summary.getOdeeVersion(), zonedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))));
             try {
+                Files.createDirectories(REPORTS_DIRECTORY);
                 Files.write(file, csvAll, UTF_8);
             } catch (IOException e) {
                 log.error(e.getLocalizedMessage(), e);
@@ -338,7 +340,8 @@ public class Runner {
             Template template = configuration.getTemplate("executions.ftl");
             StringWriter htmlWriter = new StringWriter();
             template.process(root, htmlWriter);
-            template.process(root, new FileWriter(fileName));
+            Files.createDirectories(REPORTS_DIRECTORY);
+            Files.writeString(REPORTS_DIRECTORY.resolve(fileName), htmlWriter.toString(), UTF_8);
             log.info("Send email report");
             EmailUtils.sendReport(summary.getOdeeVersion(), getUserName(), getPassword(), getSender(), getPersonal(), getRecipients(), htmlWriter.toString(), zonedDateTime.toString());
         } catch (IOException | TemplateException e) {
