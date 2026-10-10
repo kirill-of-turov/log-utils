@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,13 +52,13 @@ public class Runner {
     private static final Path REPORTS_DIRECTORY = Paths.get("reports");
     private static final Path STATS_DIRECTORY = Paths.get("stats");
 
-    private static final String OPENDATA_VERSION_REGEXP = "Opendata \\[version=(\\S*)\\]";
+    private static final String OPENDATA_VERSION_REGEXP = "Opendata \\[version=(\\S*)]";
     private static final Pattern OPENDATA_VERSION_PATTERN = Pattern.compile(OPENDATA_VERSION_REGEXP);
 
-    private static final String LOG_RECORD_REGEXP = "(\\d{2} \\w{3} \\d{4} \\d{2}:\\d{2}:\\d{2}:\\d{3})\\s+(\\w*) (\\[\\S*\\]) \\((\\w*).java:(\\d*)\\) - (.*)";
+    private static final String LOG_RECORD_REGEXP = "(\\d{2} \\w{3} \\d{4} \\d{2}:\\d{2}:\\d{2}:\\d{3})\\s+(\\w*) (\\[\\S*]) \\((\\w*).java:(\\d*)\\) - (.*)";
     private static final Pattern LOG_RECORD_PATTERN = Pattern.compile(LOG_RECORD_REGEXP);
 
-    private static final String SPRING_TIMER_FILTER_REGEXP = "for Spring Action \\[(\\w*):([\\/.\\w]*)\\] took \\((\\d*)\\) ms";
+    private static final String SPRING_TIMER_FILTER_REGEXP = "for Spring Action \\[(\\w*):([/.\\w]*)] took \\((\\d*)\\) ms";
     public static final Pattern SPRING_TIMER_FILTER_PATTERN = Pattern.compile(SPRING_TIMER_FILTER_REGEXP);
     private static final String RELEASE_REGEXP = "(\\d*\\.\\d*\\.\\d*(-\\d*)?)";
 
